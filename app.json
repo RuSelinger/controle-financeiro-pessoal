@@ -1,42 +1,33 @@
 {
-  "expo": {
-    "name": "Controle Financeiro Pessoal",
-    "slug": "controle-financeiro-pessoal",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.controlefinanceiro.pessoal"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "package": "com.controlefinanceiro.pessoal",
-      "versionCode": 1,
-      "permissions": []
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "plugins": [
-      "expo-sqlite"
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "cb452974-490d-4322-b989-7f9e2cfd07d5"
-      }
-    }
-  }
+	"expo": {
+		"name": "Controle Financeiro Pessoal",
+		"slug": "controle-financeiro-pessoal",
+		"version": "1.0.0",
+		"orientation": "portrait",
+		"userInterfaceStyle": "light",
+		"splash": {
+			"resizeMode": "contain",
+			"backgroundColor": "#3498DB"
+		},
+		"assetBundlePatterns": ["**/*"],
+		"ios": {
+			"supportsTablet": true,
+			"bundleIdentifier": "com.controlefinanceiro.pessoal"
+		},
+		"android": {
+			"adaptiveIcon": {
+				"backgroundColor": "#3498DB"
+			},
+			"package": "com.controlefinanceiro.pessoal",
+			"versionCode": 1,
+			"permissions": []
+		},
+		"plugins": ["expo-sqlite", "expo-asset"],
+		"extra": {
+			"eas": {
+				"projectId": "cb452974-490d-4322-b989-7f9e2cfd07d5"
+			}
+		}
+	}
 }
+
