@@ -5,28 +5,38 @@
 		"version": "1.0.0",
 		"orientation": "portrait",
 		"userInterfaceStyle": "light",
+		"icon": "./assets/icon.png",
 		"splash": {
+			"image": "./assets/icon.png",
 			"resizeMode": "contain",
 			"backgroundColor": "#F0EAD6"
 		},
 		"assetBundlePatterns": ["**/*"],
 		"ios": {
 			"supportsTablet": true,
-			"bundleIdentifier": "com.controlefinanceiro.pessoal"
+			"bundleIdentifier": "com.controlefinanceiro.pessoal",
+			"icon": "./assets/icon.png"
 		},
 		"android": {
 			"adaptiveIcon": {
+				"foregroundImage": "./assets/icon.png",
 				"backgroundColor": "#F0EAD6"
 			},
 			"package": "com.controlefinanceiro.pessoal",
 			"versionCode": 1,
 			"permissions": []
 		},
-		"plugins": ["expo-sqlite", "expo-asset"],
+		"plugins": ["expo-sqlite", "expo-asset", "expo-font", "expo-updates"],
 		"extra": {
 			"eas": {
 				"projectId": "cb452974-490d-4322-b989-7f9e2cfd07d5"
 			}
+		},
+		"updates": {
+			"url": "https://u.expo.dev/cb452974-490d-4322-b989-7f9e2cfd07d5"
+		},
+		"runtimeVersion": {
+			"policy": "appVersion"
 		}
 	}
 }
