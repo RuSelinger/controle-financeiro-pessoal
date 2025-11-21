@@ -1,25 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
+  Alert,
   ScrollView,
+  StyleSheet,
+  Text,
   TextInput,
   TouchableOpacity,
-  Alert,
-  Platform,
+  View
 } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { addTransaction, updateTransaction, deleteTransaction } from '../store/slices/transactionSlice';
+import { useDispatch } from 'react-redux';
 import CategorySelector from '../components/CategorySelector';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../constants/categories';
-import { formatDate } from '../utils/dateUtils';
 import theme from '../constants/theme';
+import { addTransaction, deleteTransaction, updateTransaction } from '../store/slices/transactionSlice';
+import { formatDate } from '../utils/dateUtils';
 
 const TransactionFormScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const { transaction: existingTransaction, type: initialType, isEdit } = route.params || {};
-  
+
   const [formType, setFormType] = useState(initialType || existingTransaction?.type || 'expense');
   const [amount, setAmount] = useState(existingTransaction?.amount?.toString() || '');
   const [description, setDescription] = useState(existingTransaction?.description || '');

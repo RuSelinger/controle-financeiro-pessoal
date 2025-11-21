@@ -1,34 +1,78 @@
-import { encryptData } from './cryptoService';
+import { decryptData, decryptValue, encryptData, encryptValue, generateHash } from './cryptoService';
 import { getDatabase } from './database';
 
 /**
  * Data Access Object para transações financeiras
- * Implementa o padrão DAO com criptografia
+ * Implementa o padrão DAO com criptografia AES
  */
 class TransactionDAO {
+	/**
+	 * Criptografa os dados sensíveis de uma transação
+	 */
+	async encryptTransaction(transaction) {
+		const { amount, description } = transaction;
+
+		// Criptografar dados sensíveis
+		const encryptedAmount = await encryptValue(amount);
+		const encryptedDescription = await encryptData(description);
+
+		// Gerar hash de integridade
+		const integrityHash = await generateHash(
+			`${transaction.type}-${amount}-${description}-${transaction.date}`
+		);
+
+		return {
+			...transaction,
+			amount: encryptedAmount,
+			description: encryptedDescription,
+			encrypted_hash: integrityHash,
+		};
+	}
+
+	/**
+	 * Descriptografa os dados sensíveis de uma transação
+	 */
+	async decryptTransaction(transaction) {
+		if (!transaction) return null;
+
+		try {
+			const decryptedAmount = await decryptValue(transaction.amount);
+			const decryptedDescription = await decryptData(transaction.description);
+
+			return {
+				...transaction,
+				amount: decryptedAmount,
+				description: decryptedDescription,
+			};
+		} catch (error) {
+			console.error('Erro ao descriptografar transação:', error);
+			// Se falhar a descriptografia, retornar dados originais (para compatibilidade com dados antigos)
+			return transaction;
+		}
+	}
+
 	/**
 	 * Cria uma nova transação (receita ou despesa)
 	 */
 	async create(transaction) {
 		try {
 			const db = getDatabase();
-			const { type, amount, description, category, date } = transaction;
+			const { type, category, date } = transaction;
 
 			// Criptografar dados sensíveis
-			const encryptedHash = await encryptData(
-				`${type}-${amount}-${description}-${date}`
-			);
+			const encrypted = await this.encryptTransaction(transaction);
 
 			const result = await db.runAsync(
 				`INSERT INTO transactions (type, amount, description, category, date, encrypted_hash)
          VALUES (?, ?, ?, ?, ?, ?)`,
-				[type, amount, description, category, date, encryptedHash]
+				[type, encrypted.amount, encrypted.description, category, date, encrypted.encrypted_hash]
 			);
 
+			// Retornar transação descriptografada
 			return {
 				id: result.lastInsertRowId,
 				...transaction,
-				encrypted_hash: encryptedHash,
+				encrypted_hash: encrypted.encrypted_hash,
 			};
 		} catch (error) {
 			console.error('Erro ao criar transação:', error);
@@ -45,7 +89,13 @@ class TransactionDAO {
 			const result = await db.getAllAsync(
 				`SELECT * FROM transactions ORDER BY date DESC, created_at DESC`
 			);
-			return result;
+
+			// Descriptografar todas as transações
+			const decryptedResults = await Promise.all(
+				result.map(tx => this.decryptTransaction(tx))
+			);
+
+			return decryptedResults;
 		} catch (error) {
 			console.error('Erro ao buscar transações:', error);
 			throw error;
@@ -62,7 +112,13 @@ class TransactionDAO {
 				`SELECT * FROM transactions WHERE type = ? ORDER BY date DESC, created_at DESC`,
 				[type]
 			);
-			return result;
+
+			// Descriptografar todas as transações
+			const decryptedResults = await Promise.all(
+				result.map(tx => this.decryptTransaction(tx))
+			);
+
+			return decryptedResults;
 		} catch (error) {
 			console.error('Erro ao buscar transações por tipo:', error);
 			throw error;
@@ -82,7 +138,13 @@ class TransactionDAO {
          ORDER BY date DESC, created_at DESC`,
 				[`${year}-${monthStr}`]
 			);
-			return result;
+
+			// Descriptografar todas as transações
+			const decryptedResults = await Promise.all(
+				result.map(tx => this.decryptTransaction(tx))
+			);
+
+			return decryptedResults;
 		} catch (error) {
 			console.error('Erro ao buscar transações por período:', error);
 			throw error;
@@ -99,7 +161,11 @@ class TransactionDAO {
 				`SELECT * FROM transactions WHERE id = ?`,
 				[id]
 			);
-			return result;
+
+			if (!result) return null;
+
+			// Descriptografar transação
+			return await this.decryptTransaction(result);
 		} catch (error) {
 			console.error('Erro ao buscar transação por ID:', error);
 			throw error;
@@ -112,21 +178,20 @@ class TransactionDAO {
 	async update(id, transaction) {
 		try {
 			const db = getDatabase();
-			const { type, amount, description, category, date } = transaction;
+			const { type, category, date } = transaction;
 
-			// Atualizar hash criptográfico
-			const encryptedHash = await encryptData(
-				`${type}-${amount}-${description}-${date}`
-			);
+			// Criptografar dados sensíveis
+			const encrypted = await this.encryptTransaction(transaction);
 
 			await db.runAsync(
 				`UPDATE transactions 
          SET type = ?, amount = ?, description = ?, category = ?, date = ?, encrypted_hash = ?
          WHERE id = ?`,
-				[type, amount, description, category, date, encryptedHash, id]
+				[type, encrypted.amount, encrypted.description, category, date, encrypted.encrypted_hash, id]
 			);
 
-			return { id, ...transaction, encrypted_hash: encryptedHash };
+			// Retornar transação descriptografada
+			return { id, ...transaction, encrypted_hash: encrypted.encrypted_hash };
 		} catch (error) {
 			console.error('Erro ao atualizar transação:', error);
 			throw error;
@@ -149,27 +214,26 @@ class TransactionDAO {
 
 	/**
 	 * Calcula totais por tipo no período
+	 * Nota: Como os valores estão criptografados, precisamos descriptografar cada transação
 	 */
 	async getTotalsByPeriod(year, month) {
 		try {
-			const db = getDatabase();
-			const monthStr = month.toString().padStart(2, '0');
-
-			const result = await db.getAllAsync(
-				`SELECT type, SUM(amount) as total 
-         FROM transactions 
-         WHERE strftime('%Y-%m', date) = ?
-         GROUP BY type`,
-				[`${year}-${monthStr}`]
-			);
+			// Buscar todas as transações do período e calcular manualmente
+			// pois não podemos fazer SUM() diretamente em dados criptografados
+			const transactions = await this.findByPeriod(year, month);
 
 			const totals = {
 				income: 0,
 				expense: 0,
 			};
 
-			result.forEach((row) => {
-				totals[row.type] = row.total || 0;
+			transactions.forEach((transaction) => {
+				const amount = parseFloat(transaction.amount) || 0;
+				if (transaction.type === 'income') {
+					totals.income += amount;
+				} else if (transaction.type === 'expense') {
+					totals.expense += amount;
+				}
 			});
 
 			return totals;
