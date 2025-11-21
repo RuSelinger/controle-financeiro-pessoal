@@ -10,10 +10,10 @@ import {
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import CategorySelector from '../components/CategorySelector';
+import DatePicker from '../components/DatePicker';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../constants/categories';
 import theme from '../constants/theme';
 import { addTransaction, deleteTransaction, updateTransaction } from '../store/slices/transactionSlice';
-import { formatDate } from '../utils/dateUtils';
 
 const TransactionFormScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -170,15 +170,11 @@ const TransactionFormScreen = ({ route, navigation }) => {
       {/* Date Input */}
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Data</Text>
-        <TextInput
-          style={styles.input}
-          value={formatDate(date)}
-          editable={false}
-          placeholderTextColor="#999"
+        <DatePicker
+          value={date}
+          onChange={setDate}
+          placeholder="Selecione a data da transação"
         />
-        <Text style={styles.dateHint}>
-          Data atual: {formatDate(new Date().toISOString().split('T')[0])}
-        </Text>
       </View>
 
       {/* Action Buttons */}
@@ -259,12 +255,6 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border.light,
     color: theme.colors.text.primary,
     ...theme.shadows.small,
-  },
-  dateHint: {
-    fontSize: theme.fonts.sizes.xs,
-    color: theme.colors.text.gray,
-    marginTop: theme.spacing.xs,
-    opacity: 0.7,
   },
   actionsContainer: {
     marginTop: theme.spacing.sm,
