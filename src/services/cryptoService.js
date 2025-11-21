@@ -51,14 +51,27 @@ export const encryptData = async (data) => {
 	try {
 		if (!data) return null;
 
-		const key = await getOrCreateEncryptionKey();
+		const keyString = await getOrCreateEncryptionKey();
 		const dataString = data.toString();
 
-		// Gerar IV aleatório
-		const iv = CryptoJS.lib.WordArray.random(IV_LENGTH);
+		// Gerar IV aleatório usando expo-crypto (não usa módulo nativo do Node)
+		const randomBytes = await Crypto.getRandomBytesAsync(IV_LENGTH);
+		// Converter para array de números se necessário
+		const bytesArray = Array.isArray(randomBytes) ? randomBytes : Array.from(randomBytes);
+		const iv = CryptoJS.lib.WordArray.create(bytesArray);
 
-		// Criptografar usando AES-256-CBC
-		const encrypted = CryptoJS.AES.encrypt(dataString, key, {
+		// Converter a chave string para WordArray para evitar KDF que usa random
+		// Isso evita que o CryptoJS tente usar o módulo nativo do Node.js
+		const key = CryptoJS.enc.Utf8.parse(keyString);
+
+		// Se a chave não tiver 32 bytes (256 bits), fazer hash SHA256
+		let keyWordArray = key;
+		if (key.sigBytes !== 32) {
+			keyWordArray = CryptoJS.SHA256(key);
+		}
+
+		// Criptografar usando AES-256-CBC diretamente com a chave derivada
+		const encrypted = CryptoJS.AES.encrypt(dataString, keyWordArray, {
 			iv: iv,
 			mode: CryptoJS.mode.CBC,
 			padding: CryptoJS.pad.Pkcs7,
@@ -82,7 +95,7 @@ export const decryptData = async (encryptedData) => {
 	try {
 		if (!encryptedData) return null;
 
-		const key = await getOrCreateEncryptionKey();
+		const keyString = await getOrCreateEncryptionKey();
 
 		// Converter de base64 para WordArray
 		const combined = CryptoJS.enc.Base64.parse(encryptedData);
@@ -102,8 +115,17 @@ export const decryptData = async (encryptedData) => {
 			ciphertext: ciphertext,
 		});
 
+		// Converter a chave string para WordArray (mesmo processo da criptografia)
+		const key = CryptoJS.enc.Utf8.parse(keyString);
+
+		// Se a chave não tiver 32 bytes (256 bits), fazer hash SHA256
+		let keyWordArray = key;
+		if (key.sigBytes !== 32) {
+			keyWordArray = CryptoJS.SHA256(key);
+		}
+
 		// Descriptografar
-		const decrypted = CryptoJS.AES.decrypt(cipherParams, key, {
+		const decrypted = CryptoJS.AES.decrypt(cipherParams, keyWordArray, {
 			iv: iv,
 			mode: CryptoJS.mode.CBC,
 			padding: CryptoJS.pad.Pkcs7,
