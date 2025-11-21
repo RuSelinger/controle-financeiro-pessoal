@@ -1,18 +1,20 @@
+// Categorias com cores do tema "Calma e Orgânica"
+// Usando MaterialCommunityIcons para ícones modernos e orgânicos
 export const EXPENSE_CATEGORIES = [
-	{ id: '1', name: 'Alimentação', icon: '🍔', color: '#FF6B6B' },
-	{ id: '2', name: 'Transporte', icon: '🚗', color: '#4ECDC4' },
-	{ id: '3', name: 'Lazer', icon: '🎬', color: '#95E1D3' },
-	{ id: '4', name: 'Contas', icon: '💡', color: '#F38181' },
-	{ id: '5', name: 'Saúde', icon: '🏥', color: '#AA96DA' },
-	{ id: '6', name: 'Educação', icon: '📚', color: '#FCBAD3' },
-	{ id: '7', name: 'Compras', icon: '🛍️', color: '#FFD93D' },
-	{ id: '8', name: 'Outros', icon: '📦', color: '#95A5A6' },
+	{ id: '1', name: 'Alimentação', icon: 'food-fork-drink', color: '#E37D5A' }, // Terracota
+	{ id: '2', name: 'Transporte', icon: 'car', color: '#C97D60' }, // Terracota escuro
+	{ id: '3', name: 'Lazer', icon: 'movie', color: '#D4A574' }, // Marrom claro
+	{ id: '4', name: 'Contas', icon: 'lightbulb', color: '#A52A2A' }, // Marrom suave
+	{ id: '5', name: 'Saúde', icon: 'heart-pulse', color: '#9CAF88' }, // Verde Sálvia
+	{ id: '6', name: 'Educação', icon: 'book-open', color: '#8B6F47' }, // Marrom médio
+	{ id: '7', name: 'Compras', icon: 'shopping', color: '#E37D5A' }, // Terracota
+	{ id: '8', name: 'Outros', icon: 'dots-horizontal-circle', color: '#808000' }, // Verde Oliva
 ];
 
 export const INCOME_CATEGORIES = [
-	{ id: '1', name: 'Salário', icon: '💰', color: '#2ECC71' },
-	{ id: '2', name: 'Freelance', icon: '💼', color: '#3498DB' },
-	{ id: '3', name: 'Investimentos', icon: '📈', color: '#9B59B6' },
-	{ id: '4', name: 'Outros', icon: '💵', color: '#1ABC9C' },
+	{ id: '1', name: 'Salário', icon: 'wallet', color: '#9CAF88' }, // Verde Sálvia
+	{ id: '2', name: 'Freelance', icon: 'briefcase', color: '#808000' }, // Verde Oliva
+	{ id: '3', name: 'Investimentos', icon: 'chart-line', color: '#9CAF88' }, // Verde Sálvia
+	{ id: '4', name: 'Outros', icon: 'cash-multiple', color: '#8B6F47' }, // Marrom médio
 ];
 

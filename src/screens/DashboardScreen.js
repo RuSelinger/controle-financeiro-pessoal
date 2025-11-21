@@ -1,3 +1,4 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import {
@@ -11,6 +12,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import StatCard from '../components/StatCard';
 import TransactionCard from '../components/TransactionCard';
+import theme from '../constants/theme';
 import { fetchTransactionsByPeriod } from '../store/slices/transactionSlice';
 
 const DashboardScreen = ({ navigation }) => {
@@ -59,24 +61,24 @@ const DashboardScreen = ({ navigation }) => {
 						<StatCard
 							title="Saldo"
 							value={balance}
-							color={balance >= 0 ? '#2ECC71' : '#E74C3C'}
-							icon={balance >= 0 ? '💰' : '⚠️'}
+							color={balance >= 0 ? theme.colors.functional.balance : theme.colors.functional.balanceNegative}
+							icon={balance >= 0 ? 'wallet' : 'alert-circle'}
 						/>
 					</View>
 					<View style={styles.statCardWrapper}>
 						<StatCard
 							title="Receitas"
 							value={totals.income}
-							color="#2ECC71"
-							icon="📈"
+							color={theme.colors.functional.income}
+							icon="arrow-up-circle"
 						/>
 					</View>
 					<View style={[styles.statCardWrapper, styles.lastStatCard]}>
 						<StatCard
 							title="Despesas"
 							value={totals.expense}
-							color="#E74C3C"
-							icon="📉"
+							color={theme.colors.functional.expense}
+							icon="arrow-down-circle"
 						/>
 					</View>
 				</View>
@@ -89,7 +91,7 @@ const DashboardScreen = ({ navigation }) => {
 							navigation.navigate('TransactionForm', { type: 'income' })
 						}
 					>
-						<Text style={styles.actionButtonIcon}>➕</Text>
+						<MaterialCommunityIcons name="plus-circle" size={25} color={theme.colors.text.white} />
 						<Text style={styles.actionButtonText}>Nova Receita</Text>
 					</TouchableOpacity>
 					<TouchableOpacity
@@ -98,7 +100,7 @@ const DashboardScreen = ({ navigation }) => {
 							navigation.navigate('TransactionForm', { type: 'expense' })
 						}
 					>
-						<Text style={styles.actionButtonIcon}>➖</Text>
+						<MaterialCommunityIcons name="minus-circle" size={25} color={theme.colors.text.white} />
 						<Text style={styles.actionButtonText}>Nova Despesa</Text>
 					</TouchableOpacity>
 				</View>
@@ -141,103 +143,107 @@ const DashboardScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#F5F5F5',
+		backgroundColor: theme.colors.background.primary,
 	},
 	scrollView: {
 		flex: 1,
 	},
 	header: {
-		backgroundColor: '#3498DB',
-		padding: 20,
+		backgroundColor: theme.colors.background.header,
+		padding: theme.spacing.lg,
 		paddingTop: 60,
-		borderBottomLeftRadius: 20,
-		borderBottomRightRadius: 20,
+		borderBottomLeftRadius: theme.borderRadius.xl,
+		borderBottomRightRadius: theme.borderRadius.xl,
+		...theme.shadows.medium,
 	},
 	headerTitle: {
-		fontSize: 28,
-		fontWeight: 'bold',
-		color: '#FFF',
-		marginBottom: 4,
+		fontSize: theme.fonts.sizes.xxxl,
+		fontWeight: theme.fonts.weights.bold,
+		color: theme.colors.text.white,
+		marginBottom: theme.spacing.xs,
+		letterSpacing: 0.5,
 	},
 	headerSubtitle: {
-		fontSize: 16,
-		color: '#E8F4F8',
+		fontSize: theme.fonts.sizes.md,
+		color: theme.colors.text.white,
 		textTransform: 'capitalize',
+		opacity: 0.9,
 	},
 	statsContainer: {
 		flexDirection: 'column',
-		paddingHorizontal: 16,
+		paddingHorizontal: theme.spacing.md,
 		marginTop: -20,
-		marginBottom: 16,
+		marginBottom: theme.spacing.md,
 	},
 	statCardWrapper: {
-		marginBottom: 12,
+		marginBottom: theme.spacing.sm,
 	},
 	lastStatCard: {
 		marginBottom: 0,
 	},
 	actionsContainer: {
 		flexDirection: 'row',
-		paddingHorizontal: 16,
-		marginBottom: 16,
-		gap: 12,
+		paddingHorizontal: theme.spacing.md,
+		marginBottom: theme.spacing.md,
+		gap: theme.spacing.sm,
 	},
 	actionButton: {
 		flex: 1,
 		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'center',
-		padding: 16,
-		borderRadius: 12,
-		elevation: 2,
+		paddingVertical: theme.spacing.md,
+		paddingHorizontal: theme.spacing.md,
+		borderRadius: theme.borderRadius.md,
+		...theme.shadows.medium,
 	},
 	incomeButton: {
-		backgroundColor: '#2ECC71',
+		backgroundColor: theme.colors.functional.income,
 	},
 	expenseButton: {
-		backgroundColor: '#E74C3C',
-	},
-	actionButtonIcon: {
-		fontSize: 20,
-		marginRight: 8,
+		backgroundColor: theme.colors.functional.expense,
 	},
 	actionButtonText: {
-		color: '#FFF',
-		fontSize: 14,
-		fontWeight: '600',
+		color: theme.colors.text.white,
+		fontSize: theme.fonts.sizes.sm,
+		fontWeight: theme.fonts.weights.semibold,
+		letterSpacing: 0.3,
+		marginLeft: theme.spacing.sm,
 	},
 	section: {
-		marginTop: 8,
+		marginTop: theme.spacing.sm,
 	},
 	sectionHeader: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		paddingHorizontal: 16,
-		marginBottom: 12,
+		paddingHorizontal: theme.spacing.md,
+		marginBottom: theme.spacing.sm,
 	},
 	sectionTitle: {
-		fontSize: 18,
-		fontWeight: 'bold',
-		color: '#333',
+		fontSize: theme.fonts.sizes.lg,
+		fontWeight: theme.fonts.weights.bold,
+		color: theme.colors.text.primary,
+		letterSpacing: 0.3,
 	},
 	seeAllText: {
-		fontSize: 14,
-		color: '#3498DB',
-		fontWeight: '600',
+		fontSize: theme.fonts.sizes.sm,
+		color: theme.colors.accent.primary,
+		fontWeight: theme.fonts.weights.semibold,
 	},
 	emptyContainer: {
-		padding: 32,
+		padding: theme.spacing.xl,
 		alignItems: 'center',
 	},
 	emptyText: {
-		fontSize: 16,
-		color: '#666',
-		marginBottom: 8,
+		fontSize: theme.fonts.sizes.md,
+		color: theme.colors.text.gray,
+		marginBottom: theme.spacing.sm,
 	},
 	emptySubtext: {
-		fontSize: 14,
-		color: '#999',
+		fontSize: theme.fonts.sizes.sm,
+		color: theme.colors.text.gray,
+		opacity: 0.7,
 	},
 });
 

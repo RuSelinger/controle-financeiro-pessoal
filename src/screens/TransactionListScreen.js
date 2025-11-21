@@ -9,6 +9,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import TransactionCard from '../components/TransactionCard';
 import { fetchTransactionsByPeriod } from '../store/slices/transactionSlice';
+import theme from '../constants/theme';
 
 const TransactionListScreen = ({ navigation }) => {
 	const dispatch = useDispatch();
@@ -115,45 +116,51 @@ const TransactionListScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#F5F5F5',
+		backgroundColor: theme.colors.background.primary,
 	},
 	filterContainer: {
 		flexDirection: 'row',
-		padding: 16,
-		backgroundColor: '#FFF',
+		padding: theme.spacing.md,
+		backgroundColor: theme.colors.background.card,
 		borderBottomWidth: 1,
-		borderBottomColor: '#E0E0E0',
+		borderBottomColor: theme.colors.border.light,
+		...theme.shadows.small,
 	},
 	filterButton: {
 		flex: 1,
-		paddingVertical: 8,
-		paddingHorizontal: 16,
-		marginHorizontal: 4,
-		borderRadius: 8,
-		backgroundColor: '#F5F5F5',
+		paddingVertical: theme.spacing.sm,
+		paddingHorizontal: theme.spacing.md,
+		marginHorizontal: theme.spacing.xs,
+		borderRadius: theme.borderRadius.sm,
+		backgroundColor: theme.colors.background.secondary,
 		alignItems: 'center',
+		borderWidth: 1,
+		borderColor: theme.colors.border.light,
 	},
 	activeFilter: {
-		backgroundColor: '#3498DB',
+		backgroundColor: theme.colors.accent.primary,
+		borderColor: theme.colors.accent.primary,
+		...theme.shadows.small,
 	},
 	filterText: {
-		fontSize: 14,
-		color: '#666',
-		fontWeight: '500',
+		fontSize: theme.fonts.sizes.sm,
+		color: theme.colors.text.gray,
+		fontWeight: theme.fonts.weights.medium,
+		letterSpacing: 0.2,
 	},
 	activeFilterText: {
-		color: '#FFF',
-		fontWeight: '600',
+		color: theme.colors.text.white,
+		fontWeight: theme.fonts.weights.semibold,
 	},
 	emptyContainer: {
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
-		padding: 32,
+		padding: theme.spacing.xl,
 	},
 	emptyText: {
-		fontSize: 16,
-		color: '#666',
+		fontSize: theme.fonts.sizes.md,
+		color: theme.colors.text.gray,
 	},
 });
 

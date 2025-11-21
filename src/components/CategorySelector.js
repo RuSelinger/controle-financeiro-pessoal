@@ -1,5 +1,7 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import theme from '../constants/theme';
 
 const CategorySelector = ({ categories, selectedCategory, onSelect }) => {
 	return (
@@ -18,7 +20,13 @@ const CategorySelector = ({ categories, selectedCategory, onSelect }) => {
 					]}
 					onPress={() => onSelect(category.id)}
 				>
-					<Text style={styles.icon}>{category.icon}</Text>
+					<View style={styles.iconContainer}>
+						<MaterialCommunityIcons
+							name={category.icon}
+							size={24}
+							color={selectedCategory === category.id ? theme.colors.text.white : category.color}
+						/>
+					</View>
 					<Text
 						style={[
 							styles.categoryName,
@@ -35,36 +43,42 @@ const CategorySelector = ({ categories, selectedCategory, onSelect }) => {
 
 const styles = StyleSheet.create({
 	container: {
-		marginVertical: 12,
+		marginVertical: theme.spacing.sm,
+		paddingBottom: theme.spacing.sm,
 	},
 	contentContainer: {
-		paddingHorizontal: 16,
+		paddingHorizontal: theme.spacing.md,
 	},
 	categoryItem: {
 		alignItems: 'center',
 		justifyContent: 'center',
-		paddingHorizontal: 16,
-		paddingVertical: 12,
-		marginRight: 12,
-		borderRadius: 12,
-		backgroundColor: '#F5F5F5',
+		paddingHorizontal: theme.spacing.md,
+		paddingVertical: theme.spacing.sm,
+		marginRight: theme.spacing.sm,
+		borderRadius: theme.borderRadius.md,
+		backgroundColor: theme.colors.background.secondary,
 		minWidth: 80,
+		borderWidth: 1,
+		borderColor: theme.colors.border.light,
+		...theme.shadows.small,
 	},
 	selectedCategory: {
-		backgroundColor: '#3498DB',
+		backgroundColor: theme.colors.accent.primary,
+		borderColor: theme.colors.accent.primary,
+		...theme.shadows.medium,
 	},
-	icon: {
-		fontSize: 24,
-		marginBottom: 4,
+	iconContainer: {
+		marginBottom: theme.spacing.xs,
 	},
 	categoryName: {
-		fontSize: 12,
-		color: '#666',
+		fontSize: theme.fonts.sizes.xs,
+		color: theme.colors.text.gray,
 		textAlign: 'center',
+		fontWeight: theme.fonts.weights.medium,
 	},
 	selectedText: {
-		color: '#FFF',
-		fontWeight: '600',
+		color: theme.colors.text.white,
+		fontWeight: theme.fonts.weights.semibold,
 	},
 });
 

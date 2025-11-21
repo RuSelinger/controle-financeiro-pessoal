@@ -7,7 +7,7 @@
 		"userInterfaceStyle": "light",
 		"splash": {
 			"resizeMode": "contain",
-			"backgroundColor": "#3498DB"
+			"backgroundColor": "#F0EAD6"
 		},
 		"assetBundlePatterns": ["**/*"],
 		"ios": {
@@ -16,7 +16,7 @@
 		},
 		"android": {
 			"adaptiveIcon": {
-				"backgroundColor": "#3498DB"
+				"backgroundColor": "#F0EAD6"
 			},
 			"package": "com.controlefinanceiro.pessoal",
 			"versionCode": 1,

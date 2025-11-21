@@ -1,7 +1,9 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Card } from 'react-native-paper';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../constants/categories';
+import theme from '../constants/theme';
 import { formatCurrency, formatDate } from '../utils/dateUtils';
 
 const TransactionCard = ({ transaction, onPress, onDelete }) => {
@@ -14,8 +16,12 @@ const TransactionCard = ({ transaction, onPress, onDelete }) => {
 			<Card.Content>
 				<View style={styles.row}>
 					<View style={styles.leftSection}>
-						<View style={styles.categoryIcon}>
-							<Text style={styles.iconText}>{category?.icon || '📦'}</Text>
+						<View style={[styles.categoryIcon, { backgroundColor: (category?.color || theme.colors.accent.primary) + '20' }]}>
+							<MaterialCommunityIcons
+								name={category?.icon || 'dots-horizontal-circle'}
+								size={26}
+								color={category?.color || theme.colors.accent.primary}
+							/>
 						</View>
 						<View style={styles.info}>
 							<Text style={styles.description} numberOfLines={1}>
@@ -43,9 +49,10 @@ const TransactionCard = ({ transaction, onPress, onDelete }) => {
 
 const styles = StyleSheet.create({
 	card: {
-		marginVertical: 4,
-		marginHorizontal: 16,
-		elevation: 2,
+		marginVertical: theme.spacing.xs,
+		marginHorizontal: theme.spacing.md,
+		backgroundColor: theme.colors.background.card,
+		...theme.shadows.small,
 	},
 	row: {
 		flexDirection: 'row',
@@ -58,47 +65,49 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	categoryIcon: {
-		width: 50,
-		height: 50,
-		borderRadius: 25,
-		backgroundColor: '#F5F5F5',
+		width: 52,
+		height: 52,
+		borderRadius: theme.borderRadius.full,
 		justifyContent: 'center',
 		alignItems: 'center',
-		marginRight: 12,
-	},
-	iconText: {
-		fontSize: 24,
+		marginRight: theme.spacing.sm,
+		borderWidth: 1,
+		borderColor: theme.colors.border.light,
 	},
 	info: {
 		flex: 1,
 	},
 	description: {
-		fontSize: 16,
-		fontWeight: '600',
-		color: '#333',
-		marginBottom: 4,
+		fontSize: theme.fonts.sizes.md,
+		fontWeight: theme.fonts.weights.semibold,
+		color: theme.colors.text.primary,
+		marginBottom: theme.spacing.xs,
+		letterSpacing: 0.2,
 	},
 	categoryName: {
-		fontSize: 12,
-		color: '#666',
+		fontSize: theme.fonts.sizes.xs,
+		color: theme.colors.text.gray,
 		marginBottom: 2,
+		fontWeight: theme.fonts.weights.regular,
 	},
 	date: {
-		fontSize: 11,
-		color: '#999',
+		fontSize: theme.fonts.sizes.xs - 1,
+		color: theme.colors.text.gray,
+		opacity: 0.7,
 	},
 	rightSection: {
 		alignItems: 'flex-end',
 	},
 	amount: {
-		fontSize: 18,
-		fontWeight: 'bold',
+		fontSize: theme.fonts.sizes.lg,
+		fontWeight: theme.fonts.weights.bold,
+		letterSpacing: 0.3,
 	},
 	incomeAmount: {
-		color: '#2ECC71',
+		color: theme.colors.functional.income,
 	},
 	expenseAmount: {
-		color: '#E74C3C',
+		color: theme.colors.functional.expense,
 	},
 });
 

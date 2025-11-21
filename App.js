@@ -3,6 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { Provider } from 'react-redux';
+import theme from './src/constants/theme';
 import DashboardScreen from './src/screens/DashboardScreen';
 import TransactionFormScreen from './src/screens/TransactionFormScreen';
 import TransactionListScreen from './src/screens/TransactionListScreen';
@@ -33,7 +34,7 @@ export default function App() {
 	if (isLoading) {
 		return (
 			<View style={styles.loadingContainer}>
-				<ActivityIndicator size="large" color="#3498DB" />
+				<ActivityIndicator size="large" color={theme.colors.accent.primary} />
 				<Text style={styles.loadingText}>Carregando...</Text>
 			</View>
 		);
@@ -54,18 +55,23 @@ export default function App() {
 					initialRouteName="Dashboard"
 					screenOptions={{
 						headerStyle: {
-							backgroundColor: '#3498DB',
+							backgroundColor: theme.colors.background.header,
+							elevation: 0,
+							shadowOpacity: 0,
+							borderBottomWidth: 0,
 						},
-						headerTintColor: '#FFF',
+						headerTintColor: theme.colors.text.white,
 						headerTitleStyle: {
-							fontWeight: 'bold',
+							fontWeight: theme.fonts.weights.bold,
+							fontSize: theme.fonts.sizes.lg,
+							letterSpacing: 0.3,
 						},
 					}}
 				>
 					<Stack.Screen
 						name="Dashboard"
 						component={DashboardScreen}
-						options={{ title: 'Dashboard' }}
+						options={{ headerShown: false }}
 					/>
 					<Stack.Screen
 						name="TransactionList"
@@ -94,24 +100,26 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
-		backgroundColor: '#F5F5F5',
+		backgroundColor: theme.colors.background.primary,
 	},
 	loadingText: {
-		marginTop: 12,
-		fontSize: 16,
-		color: '#666',
+		marginTop: theme.spacing.sm,
+		fontSize: theme.fonts.sizes.md,
+		color: theme.colors.text.gray,
+		fontWeight: theme.fonts.weights.medium,
 	},
 	errorContainer: {
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
-		backgroundColor: '#F5F5F5',
-		padding: 20,
+		backgroundColor: theme.colors.background.primary,
+		padding: theme.spacing.lg,
 	},
 	errorText: {
-		fontSize: 16,
-		color: '#E74C3C',
+		fontSize: theme.fonts.sizes.md,
+		color: theme.colors.functional.error,
 		textAlign: 'center',
+		fontWeight: theme.fonts.weights.medium,
 	},
 });
 

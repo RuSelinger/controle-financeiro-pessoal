@@ -1,7 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Card } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { formatCurrency } from '../utils/dateUtils';
+import theme from '../constants/theme';
 
 const StatCard = ({ title, value, color, icon }) => {
 	return (
@@ -14,7 +16,7 @@ const StatCard = ({ title, value, color, icon }) => {
 					</View>
 					{icon && (
 						<View style={[styles.iconContainer, { backgroundColor: color + '20' }]}>
-							<Text style={styles.icon}>{icon}</Text>
+							<MaterialCommunityIcons name={icon} size={28} color={color} />
 						</View>
 					)}
 				</View>
@@ -28,34 +30,40 @@ const styles = StyleSheet.create({
 		width: '100%',
 		marginVertical: 0,
 		borderLeftWidth: 4,
-		elevation: 2,
+		backgroundColor: theme.colors.background.card,
+		...theme.shadows.small,
 	},
 	content: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
+		paddingVertical: theme.spacing.xs,
 	},
 	leftSection: {
 		flex: 1,
 	},
 	title: {
-		fontSize: 12,
-		color: '#666',
-		marginBottom: 4,
+		fontSize: theme.fonts.sizes.xs,
+		color: theme.colors.text.gray,
+		marginBottom: theme.spacing.xs,
+		fontWeight: theme.fonts.weights.medium,
+		textTransform: 'uppercase',
+		letterSpacing: 0.5,
 	},
 	value: {
-		fontSize: 20,
-		fontWeight: 'bold',
+		fontSize: theme.fonts.sizes.xl,
+		fontWeight: theme.fonts.weights.bold,
+		letterSpacing: 0.3,
 	},
 	iconContainer: {
-		width: 50,
-		height: 50,
-		borderRadius: 25,
+		width: 56,
+		height: 56,
+		borderRadius: theme.borderRadius.full,
 		justifyContent: 'center',
 		alignItems: 'center',
 	},
 	icon: {
-		fontSize: 24,
+		fontSize: 28,
 	},
 });
 
