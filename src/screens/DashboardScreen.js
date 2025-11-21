@@ -10,6 +10,7 @@ import {
 	View,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import CustomToast from '../components/CustomToast';
 import StatCard from '../components/StatCard';
 import TransactionCard from '../components/TransactionCard';
 import theme from '../constants/theme';
@@ -17,20 +18,44 @@ import { fetchTransactionsByPeriod } from '../store/slices/transactionSlice';
 
 const DashboardScreen = ({ navigation }) => {
 	const dispatch = useDispatch();
-	const { transactions, totals, balance, loading, currentPeriod } = useSelector(
+	const { transactions, totals, balance, loading, currentPeriod, error } = useSelector(
 		(state) => state.transactions
 	);
+	const [localError, setLocalError] = React.useState(null);
+	const [toastVisible, setToastVisible] = React.useState(false);
+	const [toastMessage, setToastMessage] = React.useState('');
+	const [toastType, setToastType] = React.useState('error');
 
 	useEffect(() => {
 		loadTransactions();
 	}, [currentPeriod]);
 
-	const loadTransactions = () => {
-		dispatch(fetchTransactionsByPeriod(currentPeriod));
+	const showToast = (message, type = 'error') => {
+		setToastMessage(message);
+		setToastType(type);
+		setToastVisible(true);
+	};
+
+	const loadTransactions = async () => {
+		try {
+			setLocalError(null);
+			await dispatch(fetchTransactionsByPeriod(currentPeriod)).unwrap();
+		} catch (err) {
+			console.error('Erro ao carregar transações:', err);
+			showToast('Não foi possível carregar as transações. Tente novamente.', 'error');
+		}
 	};
 
 	const handleTransactionPress = (transaction) => {
-		navigation.navigate('TransactionForm', { transaction, isEdit: true });
+		try {
+			if (!transaction || !transaction.id) {
+				throw new Error('Transação inválida');
+			}
+			navigation.navigate('TransactionForm', { transaction, isEdit: true });
+		} catch (err) {
+			console.error('Erro ao abrir transação:', err);
+			showToast('Não foi possível abrir esta transação.', 'error');
+		}
 	};
 
 	const recentTransactions = transactions.slice(0, 5);
@@ -38,6 +63,13 @@ const DashboardScreen = ({ navigation }) => {
 	return (
 		<View style={styles.container}>
 			<StatusBar style="auto" />
+			<CustomToast
+				visible={toastVisible}
+				message={toastMessage}
+				type={toastType}
+				onHide={() => setToastVisible(false)}
+			/>
+
 			<ScrollView
 				style={styles.scrollView}
 				refreshControl={

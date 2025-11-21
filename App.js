@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Provider } from 'react-redux';
 import theme from './src/constants/theme';
 import DashboardScreen from './src/screens/DashboardScreen';
@@ -15,6 +15,7 @@ const Stack = createStackNavigator();
 export default function App() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
+	const [retryCount, setRetryCount] = useState(0);
 
 	useEffect(() => {
 		initializeApp();
@@ -22,13 +23,21 @@ export default function App() {
 
 	const initializeApp = async () => {
 		try {
+			setError(null);
 			await initDatabase();
 			setIsLoading(false);
 		} catch (err) {
 			console.error('Erro ao inicializar aplicativo:', err);
-			setError(err.message);
+			const errorMessage = err.message || 'Erro desconhecido ao inicializar o banco de dados';
+			setError(errorMessage);
 			setIsLoading(false);
 		}
+	};
+
+	const handleRetry = () => {
+		setRetryCount(retryCount + 1);
+		setIsLoading(true);
+		initializeApp();
 	};
 
 	if (isLoading) {
@@ -43,7 +52,15 @@ export default function App() {
 	if (error) {
 		return (
 			<View style={styles.errorContainer}>
-				<Text style={styles.errorText}>Erro ao inicializar: {error}</Text>
+				<Text style={styles.errorIcon}>⚠️</Text>
+				<Text style={styles.errorTitle}>Erro ao Inicializar</Text>
+				<Text style={styles.errorText}>{error}</Text>
+				<TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
+					<Text style={styles.retryButtonText}>Tentar Novamente</Text>
+				</TouchableOpacity>
+				{retryCount > 0 && (
+					<Text style={styles.retryText}>Tentativas: {retryCount}</Text>
+				)}
 			</View>
 		);
 	}
@@ -113,13 +130,45 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		alignItems: 'center',
 		backgroundColor: theme.colors.background.primary,
-		padding: theme.spacing.lg,
+		padding: theme.spacing.xl,
+	},
+	errorIcon: {
+		fontSize: 64,
+		marginBottom: theme.spacing.md,
+	},
+	errorTitle: {
+		fontSize: theme.fonts.sizes.xl,
+		fontWeight: theme.fonts.weights.bold,
+		color: theme.colors.text.primary,
+		marginBottom: theme.spacing.sm,
+		textAlign: 'center',
 	},
 	errorText: {
 		fontSize: theme.fonts.sizes.md,
 		color: theme.colors.functional.error,
 		textAlign: 'center',
 		fontWeight: theme.fonts.weights.medium,
+		marginBottom: theme.spacing.lg,
+		paddingHorizontal: theme.spacing.md,
+	},
+	retryButton: {
+		backgroundColor: theme.colors.accent.primary,
+		paddingVertical: theme.spacing.md,
+		paddingHorizontal: theme.spacing.xl,
+		borderRadius: theme.borderRadius.md,
+		marginTop: theme.spacing.md,
+		...theme.shadows.medium,
+	},
+	retryButtonText: {
+		color: theme.colors.text.white,
+		fontSize: theme.fonts.sizes.md,
+		fontWeight: theme.fonts.weights.semibold,
+		letterSpacing: 0.5,
+	},
+	retryText: {
+		fontSize: theme.fonts.sizes.sm,
+		color: theme.colors.text.gray,
+		marginTop: theme.spacing.sm,
 	},
 });
 

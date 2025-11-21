@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import CategorySelector from '../components/CategorySelector';
+import CustomConfirmModal from '../components/CustomConfirmModal';
+import CustomToast from '../components/CustomToast';
 import DatePicker from '../components/DatePicker';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../constants/categories';
 import theme from '../constants/theme';
@@ -27,175 +29,284 @@ const TransactionFormScreen = ({ route, navigation }) => {
     existingTransaction?.date || new Date().toISOString().split('T')[0]
   );
 
+  // Estados para o toast
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('success');
+
+  // Estados para o modal de confirmação
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+
   const categories = formType === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
 
-  const handleSave = () => {
-    // Validações
-    if (!amount || parseFloat(amount) <= 0) {
-      Alert.alert('Erro', 'Por favor, informe um valor válido');
-      return;
+  const showToast = (message, type = 'success') => {
+    setToastMessage(message);
+    setToastType(type);
+    setToastVisible(true);
+  };
+
+  const validateAmount = (value) => {
+    const numValue = parseFloat(value);
+    if (!value || value.trim() === '') {
+      return { valid: false, message: 'O valor é obrigatório' };
     }
-
-    if (!description.trim()) {
-      Alert.alert('Erro', 'Por favor, informe uma descrição');
-      return;
+    if (isNaN(numValue)) {
+      return { valid: false, message: 'Digite um valor numérico válido' };
     }
-
-    if (!category) {
-      Alert.alert('Erro', 'Por favor, selecione uma categoria');
-      return;
+    if (numValue <= 0) {
+      return { valid: false, message: 'O valor deve ser maior que zero' };
     }
-
-    const transactionData = {
-      type: formType,
-      amount: parseFloat(amount),
-      description: description.trim(),
-      category,
-      date,
-    };
-
-    if (isEdit && existingTransaction) {
-      dispatch(updateTransaction({ id: existingTransaction.id, transaction: transactionData }));
-      Alert.alert('Sucesso', 'Transação atualizada com sucesso!');
-    } else {
-      dispatch(addTransaction(transactionData));
-      Alert.alert('Sucesso', 'Transação adicionada com sucesso!');
+    if (numValue > 999999999) {
+      return { valid: false, message: 'Valor muito grande. Máximo: R$ 999.999.999,00' };
     }
+    // Validar máximo de 2 casas decimais
+    const decimalPart = value.split('.')[1] || value.split(',')[1];
+    if (decimalPart && decimalPart.length > 2) {
+      return { valid: false, message: 'Use no máximo 2 casas decimais' };
+    }
+    return { valid: true };
+  };
 
-    navigation.goBack();
+  const validateDescription = (value) => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return { valid: false, message: 'A descrição é obrigatória' };
+    }
+    if (trimmed.length < 3) {
+      return { valid: false, message: 'A descrição deve ter pelo menos 3 caracteres' };
+    }
+    if (trimmed.length > 100) {
+      return { valid: false, message: 'A descrição deve ter no máximo 100 caracteres' };
+    }
+    return { valid: true };
+  };
+
+  const validateDate = (dateStr) => {
+    if (!dateStr) {
+      return { valid: false, message: 'A data é obrigatória' };
+    }
+    const selectedDate = new Date(dateStr);
+    const today = new Date();
+    const tenYearsAgo = new Date();
+    tenYearsAgo.setFullYear(today.getFullYear() - 10);
+    const oneYearAhead = new Date();
+    oneYearAhead.setFullYear(today.getFullYear() + 1);
+
+    if (selectedDate < tenYearsAgo) {
+      return { valid: false, message: 'Data muito antiga (máximo 10 anos atrás)' };
+    }
+    if (selectedDate > oneYearAhead) {
+      return { valid: false, message: 'Data muito no futuro (máximo 1 ano)' };
+    }
+    return { valid: true };
+  };
+
+  const handleSave = async () => {
+    try {
+      // Validações detalhadas
+      const amountValidation = validateAmount(amount);
+      if (!amountValidation.valid) {
+        Alert.alert('Valor Inválido', amountValidation.message);
+        return;
+      }
+
+      const descriptionValidation = validateDescription(description);
+      if (!descriptionValidation.valid) {
+        Alert.alert('Descrição Inválida', descriptionValidation.message);
+        return;
+      }
+
+      if (!category) {
+        Alert.alert('Categoria Obrigatória', 'Por favor, selecione uma categoria');
+        return;
+      }
+
+      const dateValidation = validateDate(date);
+      if (!dateValidation.valid) {
+        Alert.alert('Data Inválida', dateValidation.message);
+        return;
+      }
+
+      const transactionData = {
+        type: formType,
+        amount: parseFloat(amount.replace(',', '.')),
+        description: description.trim(),
+        category,
+        date,
+      };
+
+      if (isEdit && existingTransaction) {
+        await dispatch(updateTransaction({ id: existingTransaction.id, transaction: transactionData })).unwrap();
+        showToast('Transação atualizada com sucesso!', 'success');
+      } else {
+        await dispatch(addTransaction(transactionData)).unwrap();
+        showToast('Transação adicionada com sucesso!', 'success');
+      }
+
+      // Aguardar um pouco para mostrar o toast antes de voltar
+      setTimeout(() => {
+        navigation.goBack();
+      }, 1500);
+    } catch (err) {
+      console.error('Erro ao salvar transação:', err);
+      Alert.alert(
+        'Erro ao Salvar',
+        err.message || 'Não foi possível salvar a transação. Tente novamente.'
+      );
+    }
   };
 
   const handleDelete = () => {
     if (!isEdit || !existingTransaction) return;
+    setConfirmModalVisible(true);
+  };
 
-    Alert.alert(
-      'Confirmar exclusão',
-      'Tem certeza que deseja excluir esta transação?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Excluir',
-          style: 'destructive',
-          onPress: () => {
-            dispatch(deleteTransaction(existingTransaction.id));
-            Alert.alert('Sucesso', 'Transação excluída com sucesso!');
-            navigation.goBack();
-          },
-        },
-      ]
-    );
+  const handleConfirmDelete = async () => {
+    setConfirmModalVisible(false);
+    try {
+      await dispatch(deleteTransaction(existingTransaction.id)).unwrap();
+      showToast('Transação excluída com sucesso!', 'success');
+      setTimeout(() => {
+        navigation.goBack();
+      }, 1500);
+    } catch (err) {
+      console.error('Erro ao excluir transação:', err);
+      showToast('Não foi possível excluir a transação', 'error');
+    }
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Type Selector */}
-      <View style={styles.typeSelector}>
-        <TouchableOpacity
-          style={[
-            styles.typeButton,
-            formType === 'income' && styles.typeButtonActive,
-            formType === 'income' && styles.incomeButtonActive,
-          ]}
-          onPress={() => {
-            setFormType('income');
-            setCategory('1');
-          }}
-        >
-          <Text
+    <View style={styles.wrapper}>
+      <CustomToast
+        visible={toastVisible}
+        message={toastMessage}
+        type={toastType}
+        onHide={() => setToastVisible(false)}
+      />
+      <CustomConfirmModal
+        visible={confirmModalVisible}
+        title="Excluir Transação"
+        message="Tem certeza que deseja excluir esta transação? Esta ação não pode ser desfeita."
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmModalVisible(false)}
+        type="danger"
+        icon="delete-outline"
+      />
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        {/* Type Selector */}
+        <View style={styles.typeSelector}>
+          <TouchableOpacity
             style={[
-              styles.typeButtonText,
-              formType === 'income' && styles.typeButtonTextActive,
+              styles.typeButton,
+              formType === 'income' && styles.typeButtonActive,
+              formType === 'income' && styles.incomeButtonActive,
             ]}
+            onPress={() => {
+              setFormType('income');
+              setCategory('1');
+            }}
           >
-            Receita
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.typeButton,
-            formType === 'expense' && styles.typeButtonActive,
-            formType === 'expense' && styles.expenseButtonActive,
-          ]}
-          onPress={() => {
-            setFormType('expense');
-            setCategory('1');
-          }}
-        >
-          <Text
-            style={[
-              styles.typeButtonText,
-              formType === 'expense' && styles.typeButtonTextActive,
-            ]}
-          >
-            Despesa
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Amount Input */}
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Valor (R$)</Text>
-        <TextInput
-          style={styles.input}
-          value={amount}
-          onChangeText={setAmount}
-          placeholder="0,00"
-          keyboardType="decimal-pad"
-          placeholderTextColor="#999"
-        />
-      </View>
-
-      {/* Description Input */}
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Descrição</Text>
-        <TextInput
-          style={styles.input}
-          value={description}
-          onChangeText={setDescription}
-          placeholder="Ex: Salário, Almoço, etc."
-          placeholderTextColor="#999"
-        />
-      </View>
-
-      {/* Category Selector */}
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Categoria</Text>
-        <CategorySelector
-          categories={categories}
-          selectedCategory={category}
-          onSelect={setCategory}
-        />
-      </View>
-
-      {/* Date Input */}
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Data</Text>
-        <DatePicker
-          value={date}
-          onChange={setDate}
-          placeholder="Selecione a data da transação"
-        />
-      </View>
-
-      {/* Action Buttons */}
-      <View style={styles.actionsContainer}>
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>
-            {isEdit ? 'Atualizar' : 'Salvar'}
-          </Text>
-        </TouchableOpacity>
-
-        {isEdit && (
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-            <Text style={styles.deleteButtonText}>Excluir</Text>
+            <Text
+              style={[
+                styles.typeButtonText,
+                formType === 'income' && styles.typeButtonTextActive,
+              ]}
+            >
+              Receita
+            </Text>
           </TouchableOpacity>
-        )}
-      </View>
-    </ScrollView>
+          <TouchableOpacity
+            style={[
+              styles.typeButton,
+              formType === 'expense' && styles.typeButtonActive,
+              formType === 'expense' && styles.expenseButtonActive,
+            ]}
+            onPress={() => {
+              setFormType('expense');
+              setCategory('1');
+            }}
+          >
+            <Text
+              style={[
+                styles.typeButtonText,
+                formType === 'expense' && styles.typeButtonTextActive,
+              ]}
+            >
+              Despesa
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Amount Input */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Valor (R$)</Text>
+          <TextInput
+            style={styles.input}
+            value={amount}
+            onChangeText={setAmount}
+            placeholder="0,00"
+            keyboardType="decimal-pad"
+            placeholderTextColor="#999"
+          />
+        </View>
+
+        {/* Description Input */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Descrição</Text>
+          <TextInput
+            style={styles.input}
+            value={description}
+            onChangeText={setDescription}
+            placeholder="Ex: Salário, Almoço, etc."
+            placeholderTextColor="#999"
+          />
+        </View>
+
+        {/* Category Selector */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Categoria</Text>
+          <CategorySelector
+            categories={categories}
+            selectedCategory={category}
+            onSelect={setCategory}
+          />
+        </View>
+
+        {/* Date Input */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Data</Text>
+          <DatePicker
+            value={date}
+            onChange={setDate}
+            placeholder="Selecione a data da transação"
+          />
+        </View>
+
+        {/* Action Buttons */}
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Text style={styles.saveButtonText}>
+              {isEdit ? 'Atualizar' : 'Salvar'}
+            </Text>
+          </TouchableOpacity>
+
+          {isEdit && (
+            <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+              <Text style={styles.deleteButtonText}>Excluir</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.background.primary,
@@ -286,6 +397,12 @@ const styles = StyleSheet.create({
     fontSize: theme.fonts.sizes.md,
     fontWeight: theme.fonts.weights.semibold,
     letterSpacing: 0.5,
+  },
+  inputHint: {
+    fontSize: theme.fonts.sizes.xs,
+    color: theme.colors.text.gray,
+    marginTop: theme.spacing.xs,
+    fontStyle: 'italic',
   },
 });
 
