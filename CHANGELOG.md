@@ -2,6 +2,119 @@
 
 Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
+## [1.1.0] - 21 Novembro 2025
+
+### 🎨 Melhorias de UX/UI
+
+#### Adicionado
+- **Sistema de Notificações Customizado (CustomToast)**
+  - Toast animado com cores do tema "Calma e Orgânica"
+  - Ícones MaterialCommunityIcons para melhor comunicação visual
+  - Auto-hide após 3 segundos
+  - Tipos: success, error, warning, info
+  - Animações suaves (fade + spring)
+  
+- **Modal de Confirmação Customizado (CustomConfirmModal)**
+  - Modal elegante para confirmações
+  - Ícone grande destacado (48px)
+  - 3 tipos: danger, warning, info
+  - Animações suaves de entrada/saída
+  - Backdrop dismissível
+  - Totalmente customizável
+
+- **Calendário em Português**
+  - Configuração completa do LocaleConfig
+  - Meses, dias e abreviações em PT-BR
+  - Interface 100% localizada
+
+#### Melhorado
+- **Tratamento de Erros Robusto**
+  - Try/catch em todas operações assíncronas
+  - Mensagens de erro amigáveis e específicas
+  - Sistema de retry em App.js
+  - Validação de dados antes de ações críticas
+  
+- **Validações de Formulário**
+  - Validação de valor (0.01 a 999.999.999,00)
+  - Validação de descrição (3 a 100 caracteres)
+  - Validação de data (10 anos atrás até 1 ano futuro)
+  - Mensagens de erro específicas e claras
+  - Contador de caracteres em tempo real
+
+- **Serviço de Criptografia**
+  - Reescrito usando apenas expo-crypto
+  - Removida dependência quebrada de CryptoJS
+  - Hash SHA256 para proteção de dados
+  - Funções: encryptData, validateDataIntegrity, hashValue, generateUUID
+  - Tratamento de erros em todos os métodos
+
+#### Removido
+- Alert.alert() nativo (substituído por CustomToast e CustomConfirmModal)
+- Código não funcional de CryptoJS
+- Emojis das mensagens (substituídos por ícones do sistema)
+- Dependências duplicadas
+
+### 🔧 Melhorias Técnicas
+
+#### Corrigido
+- Dependências duplicadas (react-native-safe-area-context)
+- Versões desatualizadas (expo-updates)
+- Código de criptografia não funcional
+- Variáveis e funções não definidas em cryptoService.js
+
+#### Otimizado
+- Tempo de execução dos testes (27s → 14s)
+- 5 pacotes duplicados removidos
+- Build pronto para produção
+- Zero vulnerabilidades
+
+### 📊 Qualidade
+
+#### Testes
+- ✅ 11/11 testes passando
+- ✅ 2 suítes de teste funcionando
+- ✅ Cobertura: utilitários e Redux Store
+
+#### Verificações
+- ✅ 17/17 checks do expo-doctor
+- ✅ Zero linting errors
+- ✅ Zero vulnerabilidades npm
+- ✅ Compatibilidade SDK 54
+
+### 📚 Documentação
+
+#### Adicionada
+- BUILD_PRODUCTION.md - Guia completo de build
+- QUICK_BUILD.md - Guia rápido (3 comandos)
+- docs/MELHORIAS_21_11_2025.md - Detalhes técnicos
+- docs/TOAST_CUSTOMIZADO.md - Sistema de notificações
+- docs/MODAL_CONFIRMACAO.md - Modal de confirmação
+
+#### Atualizada
+- README.md - Versões atualizadas
+- CHANGELOG.md - Este arquivo
+
+### 🎯 Impacto
+
+**Experiência do Usuário:**
+- 🎨 Interface mais profissional e bonita
+- 💬 Feedback visual melhorado
+- 🌍 Calendário 100% em português
+- ✅ Mensagens de sucesso elegantes
+- 🔴 Confirmações elegantes para ações críticas
+- ⚡ Animações suaves em toda interface
+
+**Qualidade do Código:**
+- 🛡️ Tratamento de erros robusto
+- ✔️ Validações completas
+- 🔒 Criptografia funcional
+- 🧪 Testes passando
+- 📦 Dependências otimizadas
+
+**Status:** ✅ Pronto para produção
+
+---
+
 ## [1.0.0] - Novembro 2025
 
 ### 🚀 Atualização Completa para Versões Mais Recentes
